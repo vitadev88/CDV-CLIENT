@@ -333,12 +333,12 @@ function SidebarInner() {
                       flex items-center justify-between px-4
                       bg-card border-b border-border">
         <Link href="/">
-          <div className="bg-white/95 rounded-xl px-3 py-1.5 shadow-sm flex items-center h-10">
+          <div className="bg-white/95 rounded-xl px-2 py-1 shadow-sm flex items-center">
             <Image
               src="/logo.png"
               alt="Cộng Đồng Việt"
-              width={80}
-              height={30}
+              width={110}
+              height={40}
               className="object-contain"
               priority
             />
