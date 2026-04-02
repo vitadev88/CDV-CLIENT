@@ -110,6 +110,7 @@ interface SidebarContentProps {
   user: { fullName?: string; avatarUrl?: string; role?: string } | null;
   isAuthenticated: boolean;
   categories: Category[];
+  topItems: NavItem[];
   unreadMessages: number;
   unreadNotifications: number;
   onClose: () => void;
@@ -122,6 +123,7 @@ function SidebarContent({
   user,
   isAuthenticated,
   categories,
+  topItems,
   unreadMessages,
   unreadNotifications,
   onClose,
@@ -161,7 +163,7 @@ function SidebarContent({
       {/* Navigation */}
       <nav className="flex-1 p-4 overflow-y-auto space-y-1">
         {/* Static top items */}
-        {TOP_ITEMS.map((item) => (
+        {topItems.map((item) => (
           <NavButton key={item.href} item={item} pathname={pathname} search={search} onClose={onClose} />
         ))}
 
@@ -328,6 +330,7 @@ function SidebarInner() {
     user,
     isAuthenticated,
     categories,
+    topItems: TOP_ITEMS,
     unreadMessages,
     unreadNotifications,
     onClose: handleClose,
