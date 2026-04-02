@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useAppSettings } from "@/context/AppSettingsContext";
 import {
   Home, Building2, Car, Tag,
   Heart, MessageSquare, Bell,
@@ -35,7 +36,7 @@ interface NavItem {
 
 // ── Static nav items ───────────────────────────────────────────────────────
 
-const TOP_ITEMS: NavItem[] = [
+const BASE_TOP_ITEMS: NavItem[] = [
   { href: "/",            label: "Trang chủ",         icon: Home, exact: true },
   { href: "/noi-bat",     label: "Tin nổi bật",        icon: Star },
   { href: "/goi-noi-bat", label: "Đẩy tin nổi bật",   icon: Zap },
@@ -284,7 +285,14 @@ function SidebarInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, logout, isAuthenticated } = useAuth();
+  const { showFeatured, showFeaturedPackages } = useAppSettings();
   const [open, setOpen] = useState(false);
+
+  const TOP_ITEMS = BASE_TOP_ITEMS.filter((item) => {
+    if (item.href === "/noi-bat" && !showFeatured) return false;
+    if (item.href === "/goi-noi-bat" && !showFeaturedPackages) return false;
+    return true;
+  });
   const [categories, setCategories] = useState<Category[]>([]);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
