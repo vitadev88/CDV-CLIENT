@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { AppSettingsProvider } from "@/context/AppSettingsContext";
 import Sidebar from "@/components/Sidebar";
 import TopBanners from "@/components/TopBanners";
 import FeedbackModal from "@/components/FeedbackModal";
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="vi" className={`${archivo.variable} dark`}>
       <body className="bg-[#09090b] text-[#fafafa] min-h-screen font-[family-name:var(--font-archivo)]">
+        <AppSettingsProvider>
         <AuthProvider>
           <div className="flex h-screen overflow-hidden">
             {/* Left sidebar */}
@@ -42,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <FeedbackModal />
         </AuthProvider>
+        </AppSettingsProvider>
       </body>
     </html>
   );
