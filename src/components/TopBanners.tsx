@@ -65,7 +65,7 @@ export default function TopBanners() {
           </div>
           <h2 className="text-2xl font-bold mb-1 text-foreground">Donate</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Website miễn phí hoàn toàn. Mọi đóng góp giúp chúng tôi duy trì hệ thống và phát triển thêm tính năng mới trong tương lai. Xây dựng cộng đồng bền vững, cùng nhau phát triển! Cảm ơn bạn rất nhiều! 
+            Website miễn phí hoàn toàn. Mọi đóng góp giúp đội ngũ phát triển duy trì hệ thống và phát triển thêm tính năng mới trong tương lai. Xây dựng cộng đồng bền vững, cùng nhau phát triển! Cảm ơn bạn rất nhiều! 
           </p>
           {donations.length === 0 ? (
             <p className="text-xs text-muted-foreground italic">Chưa có thông tin tài khoản</p>
