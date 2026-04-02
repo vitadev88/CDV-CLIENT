@@ -332,6 +332,7 @@ function SidebarInner() {
       <div className="md:hidden fixed inset-x-0 top-0 z-50 h-14
                       flex items-center justify-between px-4
                       bg-card border-b border-border">
+        <div className="w-8" />
         <Link href="/">
           <div className="bg-white/95 rounded-xl px-3 py-1 shadow-sm">
             <Image
