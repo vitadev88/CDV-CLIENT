@@ -38,6 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="pt-14 md:pt-0">
                 <TopBanners />
                 {children}
+                <footer className="py-6 text-center text-xs text-muted-foreground border-t border-border mt-8">
+                  © 2026 CongDongViet group
+                </footer>
               </main>
             </ScrollArea>
 
