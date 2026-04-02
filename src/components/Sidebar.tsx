@@ -332,14 +332,13 @@ function SidebarInner() {
       <div className="md:hidden fixed inset-x-0 top-0 z-50 h-14
                       flex items-center justify-between px-4
                       bg-card border-b border-border">
-        <div className="w-8" />
         <Link href="/">
-          <div className="bg-white/95 rounded-xl px-3 py-1 shadow-sm">
+          <div className="bg-white/95 rounded-xl px-3 py-1.5 shadow-sm flex items-center h-10">
             <Image
               src="/logo.png"
               alt="Cộng Đồng Việt"
-              width={90}
-              height={34}
+              width={80}
+              height={30}
               className="object-contain"
               priority
             />
