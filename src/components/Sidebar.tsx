@@ -276,6 +276,9 @@ function SidebarContent({
           </div>
         )}
       </div>
+      <div className="px-4 py-2 border-t border-border">
+        <p className="text-xs text-muted-foreground text-center">© 2026 CongDongViet group</p>
+      </div>
     </div>
   );
 }
