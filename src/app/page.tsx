@@ -1,65 +1,166 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import axios from "axios";
+import api from "@/lib/api";
+import { Listing } from "@/types";
+import ListingCard from "@/components/ListingCard";
+import { Button } from "@/components/ui/button";
+import { Building2, Car, Tag, ChevronRight } from "lucide-react";
+import React from "react";
 
-export default function Home() {
+interface Category {
+  id: string;
+  code: string;
+  name: string;
+  detailType: string | null;
+  active: boolean;
+  sortOrder: number;
+  children: Category[];
+}
+
+const publicApi = axios.create({
+  baseURL: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1`,
+});
+
+function iconForDetailType(detailType: string | null): React.ElementType {
+  if (detailType === "CAR") return Car;
+  if (detailType === "REAL_ESTATE") return Building2;
+  return Tag;
+}
+
+function getLeafCategories(categories: Category[]): { code: string; label: string; icon: React.ElementType }[] {
+  const leaves: { code: string; label: string; icon: React.ElementType }[] = [];
+  for (const cat of categories) {
+    if (cat.children.length > 0) {
+      for (const child of cat.children) {
+        if (child.active) {
+          leaves.push({ code: child.code, label: child.name, icon: iconForDetailType(child.detailType) });
+        }
+      }
+    } else if (cat.active) {
+      leaves.push({ code: cat.code, label: cat.name, icon: iconForDetailType(cat.detailType) });
+    }
+  }
+  return leaves;
+}
+
+const BADGES = ["Nổi bật", "Hot", "VIP", "Mới"];
+
+export default function HomePage() {
+  const [featured, setFeatured] = useState<Listing[]>([]);
+  const [sections, setSections] = useState<Record<string, { listings: Listing[]; total: number }>>({});
+  const [loading, setLoading] = useState(true);
+  const [categorySections, setCategorySections] = useState<{ code: string; label: string; icon: React.ElementType }[]>([]);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      const catRes = await publicApi.get<{ data: Category[] }>("/categories");
+      const leaves = getLeafCategories(catRes.data.data ?? []);
+      setCategorySections(leaves);
+
+      const [featuredRes, ...catResults] = await Promise.all([
+        api.get("/listings?size=5&page=0"),
+        ...leaves.map((s) =>
+          api.get(`/listings?categoryCode=${s.code}&size=4&page=0`)
+        ),
+      ]);
+      setFeatured(featuredRes.data.data?.content ?? []);
+      const map: Record<string, { listings: Listing[]; total: number }> = {};
+      leaves.forEach((s, i) => {
+        map[s.code] = {
+          listings: catResults[i]?.data?.data?.content ?? [],
+          total: catResults[i]?.data?.data?.totalElements ?? 0,
+        };
+      });
+      setSections(map);
+      setLoading(false);
+    };
+    fetchAll();
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="p-6">
+      {/* Featured Listings */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold mb-1 text-foreground">Tin đăng nổi bật</h2>
+            <p className="text-sm text-muted-foreground">Các tin đăng được quan tâm nhiều nhất</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/tim-kiem">Xem tất cả</Link>
+          </Button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {featured.map((l, i) => (
+              <ListingCard key={l.id} listing={l} badge={BADGES[i % BADGES.length]} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Category Sections */}
+      <div className="space-y-8">
+        {categorySections.map(({ code, label, icon: Icon }) => {
+          const sec = sections[code];
+          if (!loading && (!sec || sec.listings.length === 0)) return null;
+          return (
+            <div key={code} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-foreground">{label}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {loading ? "..." : `${sec?.total ?? 0}+ tin đăng`}
+                    </p>
+                  </div>
+                </div>
+                <Button asChild variant="ghost" className="gap-1">
+                  <Link href={`/tim-kiem?category=${code}`}>
+                    Xem tất cả
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {sec?.listings.map((l, i) => (
+                    <ListingCard key={l.id} listing={l} badge={i === 0 ? "Nổi bật" : undefined} />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-card border border-border rounded-lg overflow-hidden animate-pulse">
+      <div className="aspect-[4/3] bg-muted" />
+      <div className="p-4 space-y-2">
+        <div className="h-4 bg-muted rounded w-full" />
+        <div className="h-4 bg-muted rounded w-2/3" />
+        <div className="h-5 bg-muted rounded w-1/2 mt-1" />
+      </div>
     </div>
   );
 }
