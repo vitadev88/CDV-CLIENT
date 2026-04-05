@@ -2,9 +2,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import api from "@/lib/api";
 
-interface AppSettings {
+export interface AppSettings {
   showFeatured: boolean;
   showFeaturedPackages: boolean;
+  logoUrl: string | null;
+  siteTitle: string;
+  siteDescription: string;
+  maintenanceMode: boolean;
 }
 
 interface AppSettingsContextValue extends AppSettings {
@@ -14,6 +18,10 @@ interface AppSettingsContextValue extends AppSettings {
 const defaults: AppSettings = {
   showFeatured: true,
   showFeaturedPackages: true,
+  logoUrl: null,
+  siteTitle: "CongDongViet - Cộng đồng Việt Nam tại Đài Loan",
+  siteDescription: "",
+  maintenanceMode: false,
 };
 
 const AppSettingsContext = createContext<AppSettingsContextValue>({
