@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, Users, Tag, Layers, FileText,
-  Star, Settings, LogOut, Bell, ChevronRight, Heart, Zap, MessageSquarePlus,
+  Star, Settings, LogOut, Bell, ChevronRight, Heart, Zap, MessageSquarePlus, BookOpen,
 } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import api from "@/lib/api";
@@ -17,6 +17,7 @@ const NAV = [
   { href: "/admin/listings",   icon: FileText,        label: "Tin đăng",       superAdminOnly: false },
   { href: "/admin/featured",            icon: Star,            label: "Nổi bật",        superAdminOnly: false },
   { href: "/admin/featured-packages",   icon: Zap,             label: "Gói nổi bật",    superAdminOnly: false },
+  { href: "/admin/blog",        icon: BookOpen,          label: "Blog",           superAdminOnly: false },
   { href: "/admin/feedback",   icon: MessageSquarePlus, label: "Góp ý",        superAdminOnly: false },
   { href: "/admin/donation",   icon: Heart,           label: "Donate",         superAdminOnly: true  },
   { href: "/admin/settings",   icon: Settings,        label: "Cài đặt",        superAdminOnly: false },
@@ -70,7 +71,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         {visibleNav.map(({ href, icon: Icon, label }) => (
           <Link key={href} href={href}
             className={`relative flex items-center gap-3 mx-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors
-              ${pathname === href
+              ${(href === "/admin" ? pathname === href : pathname.startsWith(href))
                 ? "bg-[#1CE479] text-black"
                 : "text-[#9CA3AF] hover:bg-[#1A1A20] hover:text-white"}`}>
             <Icon className="w-4 h-4" />

@@ -4,12 +4,11 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { AppSettingsProvider } from "@/context/AppSettingsContext";
 import Sidebar from "@/components/Sidebar";
-import TopBanners from "@/components/TopBanners";
 import FeedbackModal from "@/components/FeedbackModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const archivo = Archivo({
-  subsets: ["latin"],
+  subsets: ["latin", "vietnamese"],
   variable: "--font-archivo",
   display: "swap",
 });
@@ -25,8 +24,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="vi" className={`${archivo.variable} dark`}>
-      <body className="bg-[#09090b] text-[#fafafa] min-h-screen font-[family-name:var(--font-archivo)]">
+    <html lang="vi" className={`${archivo.variable}`}>
+      <body className="min-h-screen font-[family-name:var(--font-archivo)]">
         <AppSettingsProvider>
         <AuthProvider>
           <div className="flex h-screen overflow-hidden">
@@ -36,7 +35,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Main content */}
             <ScrollArea className="flex-1 min-w-0 h-screen">
               <main className="pt-14 md:pt-0">
-                <TopBanners />
                 {children}
                 <footer className="py-6 text-center text-xs text-muted-foreground border-t border-border mt-8">
                   © 2026 CongDongViet group
