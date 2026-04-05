@@ -70,9 +70,9 @@ export default async function BlogPage({
   qs.set("sort", "publishedAt,desc");
 
   const [blogPage, categories, trending] = await Promise.all([
-    blogServerApi.getPosts(qs.toString()),
-    blogServerApi.getCategories(),
-    blogServerApi.getTrending(),
+    blogServerApi.getPosts(qs.toString()).catch(() => ({ content: [], totalElements: 0, totalPages: 0, number: 0 })),
+    blogServerApi.getCategories().catch(() => []),
+    blogServerApi.getTrending().catch(() => []),
   ]);
 
   const selectedCat = categories.find((c) => c.id === params.categoryId);
