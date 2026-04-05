@@ -7,7 +7,7 @@ import { useAppSettings } from "@/context/AppSettingsContext";
 import {
   Home, Building2, Car, Tag,
   Heart, MessageSquare, Bell,
-  MapPin, PlusCircle, Menu, X, LogOut, LayoutDashboard, Star, Zap,
+  PlusCircle, Menu, X, LogOut, LayoutDashboard, Star, Zap, BookOpen,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import React from "react";
@@ -38,6 +38,7 @@ interface NavItem {
 
 const BASE_TOP_ITEMS: NavItem[] = [
   { href: "/",            label: "Trang chủ",         icon: Home, exact: true },
+  { href: "/blog",        label: "Blog",               icon: BookOpen },
   { href: "/noi-bat",     label: "Tin nổi bật",        icon: Star },
   { href: "/goi-noi-bat", label: "Đẩy tin nổi bật",   icon: Zap },
 ];
@@ -88,14 +89,14 @@ function NavButton({
     <Button
       asChild
       variant={active ? "default" : "ghost"}
-      className={`w-full justify-start gap-3 h-12 ${
+      className={`w-full justify-start gap-3 h-11 text-sm ${
         active
-          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+          ? "bg-[#D41B2C] text-white hover:bg-[#B91624]"
+          : "text-[#6B7280] hover:text-[#1F2937] hover:bg-[#F5F5F5]"
       }`}
     >
       <Link href={item.href} onClick={onClose}>
-        <Icon className="w-5 h-5" />
+        <Icon className="w-4.5 h-4.5" />
         {item.label}
       </Link>
     </Button>
@@ -130,7 +131,7 @@ function SidebarContent({
   onLogout,
 }: SidebarContentProps) {
   return (
-    <div className="w-64 bg-card border-r border-border h-full flex flex-col">
+    <div className="w-64 bg-white border-r border-[#E5E7EB] h-full flex flex-col shadow-sm">
       {/* Logo */}
       <div className="p-4 border-b border-border">
         <Link href="/" onClick={onClose} className="flex items-center justify-center">
@@ -148,10 +149,10 @@ function SidebarContent({
       </div>
 
       {/* Post Listing Button */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-[#E5E7EB]">
         <Button
           asChild
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 gap-2"
+          className="w-full bg-[#D41B2C] text-white hover:bg-[#B91624] h-11 gap-2 text-sm font-semibold"
         >
           <Link href="/dang-tin" onClick={onClose}>
             <PlusCircle className="w-5 h-5" />
@@ -176,7 +177,7 @@ function SidebarContent({
                 <div key={parent.id}>
                   {/* Parent label (only if it has children) */}
                   {parent.children.length > 0 && (
-                    <p className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    <p className="px-3 py-1 text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">
                       {parent.name}
                     </p>
                   )}
@@ -206,7 +207,7 @@ function SidebarContent({
         )}
 
         {/* Static bottom items */}
-        <div className="pt-2 border-t border-border space-y-1">
+        <div className="pt-2 border-t border-[#E5E7EB] space-y-1">
           {BOTTOM_ITEMS.map((item) => {
             if (item.authRequired && !isAuthenticated) return null;
             const badge = item.href === "/tin-nhan" ? unreadMessages
@@ -226,12 +227,12 @@ function SidebarContent({
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-border space-y-2">
+      <div className="p-4 border-t border-[#E5E7EB] space-y-2">
         {isAuthenticated && user && (user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
           <Link
             href="/admin"
             onClick={onClose}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg bg-[#FEF2F2] text-[#D41B2C] hover:bg-red-100 transition-colors text-sm font-medium"
           >
             <LayoutDashboard className="w-4 h-4 shrink-0" />
             Trang quản trị
@@ -239,19 +240,19 @@ function SidebarContent({
         )}
         {isAuthenticated && user ? (
           <div className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden bg-primary flex items-center justify-center select-none">
+            <div className="w-9 h-9 rounded-full shrink-0 overflow-hidden bg-[#FEF2F2] border border-red-100 flex items-center justify-center select-none">
               {user.avatarUrl ? (
                 <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-primary-foreground font-medium text-sm">
+                <span className="text-[#D41B2C] font-semibold text-sm">
                   {user.fullName?.slice(0, 2).toUpperCase()}
                 </span>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground truncate">{user.fullName}</p>
-              <p className="text-sm text-muted-foreground">
-                <Link href="/ho-so" onClick={onClose} className="hover:text-primary transition-colors">
+              <p className="font-medium text-[#1F2937] truncate text-sm">{user.fullName}</p>
+              <p className="text-xs text-[#6B7280]">
+                <Link href="/ho-so" onClick={onClose} className="hover:text-[#D41B2C] transition-colors">
                   Xem trang cá nhân
                 </Link>
               </p>
@@ -259,7 +260,7 @@ function SidebarContent({
             <button
               title="Đăng xuất"
               onClick={onLogout}
-              className="shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10
+              className="shrink-0 p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#D41B2C] hover:bg-[#FEF2F2]
                          opacity-0 group-hover:opacity-100 transition-all duration-150"
             >
               <LogOut size={14} />
@@ -267,10 +268,10 @@ function SidebarContent({
           </div>
         ) : (
           <div className="flex gap-2">
-            <Button asChild variant="outline" className="flex-1">
+            <Button asChild variant="outline" className="flex-1 text-sm border-[#E5E7EB] text-[#1F2937] hover:border-[#D41B2C] hover:text-[#D41B2C]">
               <Link href="/dang-nhap" onClick={onClose}>Đăng nhập</Link>
             </Button>
-            <Button asChild className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button asChild className="flex-1 text-sm bg-[#D41B2C] text-white hover:bg-[#B91624]">
               <Link href="/dang-ky" onClick={onClose}>Đăng ký</Link>
             </Button>
           </div>
@@ -342,11 +343,11 @@ function SidebarInner() {
       {/* Mobile top bar */}
       <div className="md:hidden fixed inset-x-0 top-0 z-50 h-14
                       flex items-center justify-between px-4
-                      bg-card border-b border-border">
-        <Link href="/" className="font-bold text-lg text-foreground">
+                      bg-white border-b border-[#E5E7EB] shadow-sm">
+        <Link href="/" className="font-bold text-base text-[#D41B2C]">
           Cộng Đồng Việt
         </Link>
-        <button onClick={() => setOpen(!open)} className="p-1.5 text-muted-foreground hover:text-foreground">
+        <button onClick={() => setOpen(!open)} className="p-1.5 text-[#6B7280] hover:text-[#1F2937]">
           {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
