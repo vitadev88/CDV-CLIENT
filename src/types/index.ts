@@ -151,6 +151,65 @@ export interface UserProfile {
   createdAt: string;
 }
 
+// ── Blog ─────────────────────────────────────────────────────────────────────
+
+export type BlogStatus = "DRAFT" | "PUBLISHED";
+
+export interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface BlogPostSummary {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  thumbnail?: string;
+  categoryId?: string;
+  categoryName?: string;
+  categorySlug?: string;
+  authorId: string;
+  authorName: string;
+  tags: string[];
+  status: BlogStatus;
+  viewCount: number;
+  publishedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogPost extends BlogPostSummary {
+  content: string;
+  authorAvatarUrl?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+}
+
+export interface BlogPage {
+  content: BlogPostSummary[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface CreateBlogPostPayload {
+  title: string;
+  slug?: string;
+  content: string;
+  excerpt?: string;
+  thumbnail?: string;
+  categoryId?: string;
+  tags?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  status?: BlogStatus;
+}
+
 // Upload
 export interface UploadResponse {
   urls: string[];

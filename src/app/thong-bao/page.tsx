@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationResponse } from "@/types";
-import { Bell, Check, CheckCheck, MessageSquare, Heart, Star, AlertCircle } from "lucide-react";
+import { Bell, CheckCheck, MessageSquare, Heart, Star, AlertCircle } from "lucide-react";
 import { timeAgo } from "@/lib/utils";
 
 export default function NotificationsPage() {
@@ -44,12 +44,12 @@ export default function NotificationsPage() {
     <div className="p-5 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-primary" />
-          <h1 className="text-xl font-bold text-white">Thông báo</h1>
+          <Bell className="w-5 h-5 text-[#D41B2C]" />
+          <h1 className="text-xl font-bold text-[#1F2937]">Thông báo</h1>
         </div>
         {notifications.some(n => !n.read) && (
           <button onClick={markAllAsRead}
-            className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
+            className="flex items-center gap-1.5 text-sm text-[#D41B2C] hover:text-[#B91624] transition-colors">
             <CheckCheck className="w-4 h-4" /> Đánh dấu tất cả đã đọc
           </button>
         )}
@@ -58,12 +58,12 @@ export default function NotificationsPage() {
       {loading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-xl p-4 h-20 animate-pulse" />
+            <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl p-4 h-20 animate-pulse" />
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
-          <Bell size={48} className="mx-auto mb-3 text-border" />
+        <div className="text-center py-20 text-[#6B7280]">
+          <Bell size={48} className="mx-auto mb-3 text-[#D1D5DB]" />
           <p>Chưa có thông báo nào.</p>
         </div>
       ) : (
@@ -74,20 +74,20 @@ export default function NotificationsPage() {
               onClick={() => !n.read && markAsRead(n.id)}
               className={`flex items-start gap-3 p-4 rounded-xl border transition-colors cursor-pointer ${
                 n.read
-                  ? "bg-card border-border"
-                  : "bg-primary/5 border-primary/20 hover:bg-primary/10"
+                  ? "bg-white border-[#E5E7EB]"
+                  : "bg-[#FEF2F2] border-[#D41B2C]/20 hover:bg-red-50"
               }`}
             >
               <div className="mt-0.5">{iconForType(n.type)}</div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${n.read ? "text-muted-foreground" : "text-white"}`}>
+                <p className={`text-sm font-medium ${n.read ? "text-[#6B7280]" : "text-[#1F2937]"}`}>
                   {n.title}
                 </p>
-                {n.content && <p className="text-xs text-muted-foreground mt-0.5 truncate">{n.content}</p>}
-                <p className="text-xs text-muted-foreground mt-1">{timeAgo(n.createdAt)}</p>
+                {n.content && <p className="text-xs text-[#6B7280] mt-0.5 truncate">{n.content}</p>}
+                <p className="text-xs text-[#9CA3AF] mt-1">{timeAgo(n.createdAt)}</p>
               </div>
               {!n.read && (
-                <div className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 mt-1.5" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#D41B2C] shrink-0 mt-1.5" />
               )}
             </div>
           ))}
