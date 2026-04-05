@@ -66,6 +66,7 @@ export default function AdminSettingsPage() {
             enabled={showFeaturedPackages}
             onToggle={() => update({ showFeaturedPackages: !showFeaturedPackages })}
           />
+
         </div>
       </div>
     </AdminShell>
