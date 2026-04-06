@@ -206,13 +206,7 @@ export default async function BlogDetailPage({
 
               {/* Content */}
               <div
-                className="mt-6 prose prose-slate max-w-none
-                           prose-headings:font-bold prose-headings:text-[#1F2937]
-                           prose-p:text-[#374151] prose-p:leading-relaxed
-                           prose-a:text-[#D41B2C] prose-a:no-underline hover:prose-a:underline
-                           prose-img:rounded-xl prose-img:shadow-md
-                           prose-blockquote:border-[#D41B2C] prose-blockquote:text-[#6B7280]
-                           prose-code:text-[#D41B2C] prose-code:bg-red-50 prose-code:px-1 prose-code:rounded"
+                className="mt-6 prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
             </div>
