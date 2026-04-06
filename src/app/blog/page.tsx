@@ -5,7 +5,7 @@ import BlogCard from "@/components/BlogCard";
 import BlogListClient from "./BlogListClient";
 import { TrendingUp, BookOpen, Tag } from "lucide-react";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://congdongviet.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://congdongviet6368.com";
 
 type SearchParams = Promise<{ keyword?: string; categoryId?: string; page?: string }>;
 
