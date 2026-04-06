@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import FeedbackModal from "@/components/FeedbackModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const archivo = Archivo({
   subsets: ["latin", "vietnamese"],
@@ -65,6 +66,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </MaintenanceGuard>
         </AuthProvider>
         </AppSettingsProvider>
+        {/* Google Analytics */}
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
       </body>
     </html>
   );
