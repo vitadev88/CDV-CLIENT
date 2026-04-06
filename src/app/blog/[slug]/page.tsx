@@ -6,7 +6,7 @@ import { blogServerApi } from "@/lib/blogApi";
 import BlogCard from "@/components/BlogCard";
 import { Calendar, Eye, Tag, User, ArrowLeft } from "lucide-react";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://congdongviet.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://congdongviet6368.com";
 
 export async function generateMetadata({
   params,
