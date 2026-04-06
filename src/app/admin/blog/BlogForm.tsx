@@ -33,9 +33,10 @@ type FormValues = z.infer<typeof schema>;
 function toSlug(s: string) {
   return s
     .toLowerCase()
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "d")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
@@ -265,7 +266,7 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
   const seoTitle = watch("metaTitle") || watchTitle || "Tiêu đề bài viết";
   const seoDesc  = watchMeta || watch("excerpt") || "Mô tả bài viết sẽ hiện ở đây...";
   const seoSlug  = watchSlug || "slug-bai-viet";
-  const seoUrl   = `congdongviet.com/blog/${seoSlug}`;
+  const seoUrl   = `congdongviet6368.com/blog/${seoSlug}`;
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-0">
@@ -307,7 +308,7 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
             {/* Slug row */}
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#1A1A20]">
               <Hash className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
-              <span className="text-xs text-[#9CA3AF]">congdongviet.com/blog/</span>
+              <span className="text-xs text-[#9CA3AF]">congdongviet6368.com/blog/</span>
               <input
                 {...register("slug")}
                 placeholder="slug-bai-viet"

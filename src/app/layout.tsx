@@ -15,10 +15,27 @@ const archivo = Archivo({
 
 export const metadata: Metadata = {
   title: "Cộng Đồng Việt — Marketplace người Việt tại Đài Loan",
-  description: "Tìm phòng thuê, mua bán nhà đất và xe cộ cho người Việt tại Đài Loan",
+  description: "Mua bán, tìm việc làm, thuê phòng và kết nối cộng đồng người Việt tại Đài Loan. Marketplace uy tín số 1 cho người Việt ở Đài Loan.",
+  metadataBase: new URL("https://congdongviet6368.com"),
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
+  },
+  openGraph: {
+    title: "Cộng Đồng Việt — Marketplace người Việt tại Đài Loan",
+    description: "Mua bán, tìm việc làm, thuê phòng và kết nối cộng đồng người Việt tại Đài Loan.",
+    url: "https://congdongviet6368.com",
+    siteName: "Cộng Đồng Việt",
+    locale: "vi_VN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cộng Đồng Việt — Marketplace người Việt tại Đài Loan",
+    description: "Mua bán, tìm việc làm, thuê phòng và kết nối cộng đồng người Việt tại Đài Loan.",
+  },
+  alternates: {
+    canonical: "https://congdongviet6368.com",
   },
 };
 
