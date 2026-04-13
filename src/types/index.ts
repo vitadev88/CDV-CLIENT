@@ -153,7 +153,7 @@ export interface UserProfile {
 
 // ── Blog ─────────────────────────────────────────────────────────────────────
 
-export type BlogStatus = "DRAFT" | "PUBLISHED";
+export type BlogStatus = "DRAFT" | "SCHEDULED" | "PUBLISHED";
 
 export interface BlogCategory {
   id: string;
@@ -178,6 +178,7 @@ export interface BlogPostSummary {
   status: BlogStatus;
   viewCount: number;
   publishedAt?: string;
+  scheduledAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -208,6 +209,8 @@ export interface CreateBlogPostPayload {
   metaTitle?: string;
   metaDescription?: string;
   status?: BlogStatus;
+  /** ISO-8601 local datetime — required when status=SCHEDULED */
+  scheduledAt?: string;
 }
 
 // Upload

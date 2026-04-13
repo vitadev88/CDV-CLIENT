@@ -25,7 +25,8 @@ const schema = z.object({
   categoryId:      z.string().optional(),
   metaTitle:       z.string().optional(),
   metaDescription: z.string().max(320, "Tối đa 320 ký tự").optional(),
-  status:          z.enum(["DRAFT", "PUBLISHED"]),
+  status:          z.enum(["DRAFT", "SCHEDULED", "PUBLISHED"]),
+  scheduledAt:     z.string().optional(),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -75,7 +76,7 @@ function TBtn({
 // ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
   initial?: BlogPost;
-  onSubmit: (values: FormValues & { content: string; tags: string[] }) => Promise<void>;
+  onSubmit: (values: FormValues & { content: string; tags: string[]; scheduledAt?: string }) => Promise<void>;
   submitLabel: string;
 }
 
@@ -93,6 +94,12 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
   const editorRef  = useRef<HTMLDivElement>(null);
   const fileRef    = useRef<HTMLInputElement>(null);
 
+  // ── Internal Link Panel ───────────────────────────────────────────────────
+  const [linkSearch,    setLinkSearch]    = useState("");
+  const [linkResults,   setLinkResults]   = useState<import("@/types").BlogPostSummary[]>([]);
+  const [linkSearching, setLinkSearching] = useState(false);
+  const [linkInserted,  setLinkInserted]  = useState<string | null>(null);
+
   const {
     register, handleSubmit, watch, setValue,
     formState: { errors },
@@ -106,14 +113,18 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
       categoryId:      initial?.categoryId ?? "",
       metaTitle:       initial?.metaTitle ?? "",
       metaDescription: initial?.metaDescription ?? "",
-      status:          (initial?.status as "DRAFT" | "PUBLISHED") ?? "DRAFT",
+      status:          (initial?.status as "DRAFT" | "SCHEDULED" | "PUBLISHED") ?? "DRAFT",
+      scheduledAt:     initial?.scheduledAt
+                         ? initial.scheduledAt.slice(0, 16)   // trim to "YYYY-MM-DDTHH:mm"
+                         : "",
     },
   });
 
-  const watchTitle  = watch("title");
-  const watchSlug   = watch("slug");
-  const watchMeta   = watch("metaDescription") ?? "";
-  const watchThumb  = watch("thumbnail") ?? "";
+  const watchTitle   = watch("title");
+  const watchSlug    = watch("slug");
+  const watchMeta    = watch("metaDescription") ?? "";
+  const watchThumb   = watch("thumbnail") ?? "";
+  const watchStatus  = watch("status");
 
   // ── Auto-slug from title ───────────────────────────────────────────────────
   useEffect(() => {
@@ -176,6 +187,55 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
   const discardDraft = () => {
     localStorage.removeItem(AUTOSAVE_KEY);
     setDraftInfo(null);
+  };
+
+  // ── Debounced internal-link search ────────────────────────────────────────
+  useEffect(() => {
+    if (!linkSearch.trim()) { setLinkResults([]); return; }
+    const id = setTimeout(async () => {
+      setLinkSearching(true);
+      try {
+        const r = await blogApi.adminGetPosts({ keyword: linkSearch, status: "PUBLISHED", size: 8 });
+        setLinkResults(r.data.data?.content ?? []);
+      } catch { /* ignore */ } finally { setLinkSearching(false); }
+    }, 350);
+    return () => clearTimeout(id);
+  }, [linkSearch]);
+
+  // ── Insert internal link at editor cursor ──────────────────────────────────
+  const insertInternalLink = (post: import("@/types").BlogPostSummary) => {
+    const href  = `/blog/${post.slug}`;
+    const label = post.title;
+
+    if (editorMode === "rich" && editorRef.current) {
+      editorRef.current.focus();
+      const sel = window.getSelection();
+      if (sel && sel.toString().trim()) {
+        // Wrap selected text with link
+        document.execCommand("createLink", false, href);
+      } else {
+        // Insert full anchor at cursor
+        document.execCommand("insertHTML", false,
+          `<a href="${href}">${label}</a>`);
+      }
+      syncHtml();
+    } else {
+      // HTML source mode — insert at textarea cursor
+      const ta = document.querySelector(
+        'textarea[placeholder="<!-- HTML source -->"]'
+      ) as HTMLTextAreaElement | null;
+      const linkHtml = `<a href="${href}">${label}</a>`;
+      if (ta) {
+        const s = ta.selectionStart ?? ta.value.length;
+        const e = ta.selectionEnd   ?? s;
+        setHtmlSource(ta.value.slice(0, s) + linkHtml + ta.value.slice(e));
+      } else {
+        setHtmlSource((prev) => prev + linkHtml);
+      }
+    }
+
+    setLinkInserted(post.slug);
+    setTimeout(() => setLinkInserted(null), 2000);
   };
 
   // ── execCommand helpers ────────────────────────────────────────────────────
@@ -243,6 +303,15 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
 
   // ── Form submit ────────────────────────────────────────────────────────────
   const handleFormSubmit = async (values: FormValues) => {
+    // Validate: SCHEDULED requires a future date
+    if (values.status === "SCHEDULED") {
+      if (!values.scheduledAt) {
+        alert("Vui lòng chọn ngày và giờ đăng bài."); return;
+      }
+      if (new Date(values.scheduledAt) <= new Date()) {
+        alert("Thời gian đặt lịch phải ở tương lai."); return;
+      }
+    }
     // Capture latest rich editor content
     if (editorMode === "rich" && editorRef.current) setHtmlSource(editorRef.current.innerHTML);
     const content = editorMode === "rich"
@@ -251,7 +320,13 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
     if (!content.trim()) { alert("Nội dung không được để trống."); return; }
     setSubmitting(true);
     try {
-      await onSubmit({ ...values, content, tags });
+      await onSubmit({
+        ...values,
+        content,
+        tags,
+        // Only send scheduledAt when status is SCHEDULED
+        scheduledAt: values.status === "SCHEDULED" ? values.scheduledAt : undefined,
+      });
       if (!initial) { localStorage.removeItem(AUTOSAVE_KEY); }
     } finally { setSubmitting(false); }
   };
@@ -536,19 +611,60 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
                            text-sm text-[#E5E7EB] focus:outline-none focus:border-[#1CE479]"
               >
                 <option value="DRAFT">📝 Lưu nháp</option>
+                <option value="SCHEDULED">🕐 Đặt lịch đăng</option>
                 <option value="PUBLISHED">🌐 Đăng ngay</option>
               </select>
             </div>
+
+            {/* Scheduled datetime picker — only shown when status = SCHEDULED */}
+            {watchStatus === "SCHEDULED" && (
+              <div className="space-y-1.5">
+                <label className="block text-xs text-[#9CA3AF]">
+                  Ngày &amp; giờ đăng bài
+                </label>
+                <input
+                  type="datetime-local"
+                  {...register("scheduledAt")}
+                  min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
+                  className="w-full h-9 px-3 rounded-lg bg-[#0D0D12] border border-[#2A2A35]
+                             text-sm text-[#E5E7EB] focus:outline-none focus:border-[#1CE479]
+                             [color-scheme:dark]"
+                />
+                <p className="text-[10px] text-[#9CA3AF] leading-relaxed">
+                  Bài sẽ tự động xuất hiện trên web đúng thời điểm này.
+                </p>
+                {/* Countdown preview */}
+                {watch("scheduledAt") && new Date(watch("scheduledAt")!) > new Date() && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#1CE479]
+                                  bg-[#1CE479]/5 border border-[#1CE479]/20 rounded-lg px-2.5 py-1.5">
+                    <Clock className="w-3 h-3 shrink-0" />
+                    <span>
+                      Sẽ đăng vào{" "}
+                      {new Date(watch("scheduledAt")!).toLocaleString("vi-VN", {
+                        day: "2-digit", month: "2-digit", year: "numeric",
+                        hour: "2-digit", minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 bg-[#1CE479] hover:bg-[#16c96a]
-                         text-black font-semibold rounded-xl py-2.5 text-sm transition-colors
-                         disabled:opacity-60 disabled:cursor-not-allowed"
+              className={`w-full flex items-center justify-center gap-2 font-semibold rounded-xl
+                          py-2.5 text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed
+                          ${watchStatus === "SCHEDULED"
+                            ? "bg-blue-500 hover:bg-blue-400 text-white"
+                            : "bg-[#1CE479] hover:bg-[#16c96a] text-black"
+                          }`}
             >
               {submitting
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Đang lưu...</>
-                : <><CheckCircle2 className="w-4 h-4" /> {submitLabel}</>
+                : watchStatus === "SCHEDULED"
+                  ? <><Clock className="w-4 h-4" /> Đặt lịch</>
+                  : <><CheckCircle2 className="w-4 h-4" /> {submitLabel}</>
               }
             </button>
           </div>
@@ -602,6 +718,66 @@ export default function BlogForm({ initial, onSubmit, submitLabel }: Props) {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* ── Internal Link Panel ───────────────────────────────────── */}
+          <div className="bg-[#111118] border border-[#1A1A20] rounded-xl p-4 space-y-3">
+            <h3 className="flex items-center gap-1.5 text-xs font-semibold text-[#9CA3AF] uppercase tracking-wider">
+              <Link2 className="w-3.5 h-3.5" />
+              Chèn Internal Link
+            </h3>
+
+            {/* Search */}
+            <div className="relative">
+              <input
+                type="text"
+                value={linkSearch}
+                onChange={(e) => setLinkSearch(e.target.value)}
+                placeholder="Tìm bài viết đã đăng..."
+                className="w-full h-8 pl-2.5 pr-7 rounded-lg bg-[#0D0D12] border border-[#2A2A35]
+                           text-sm text-[#E5E7EB] placeholder-[#4A4A55]
+                           focus:outline-none focus:border-[#1CE479] transition"
+              />
+              {linkSearching && (
+                <Loader2 className="absolute right-2 top-2 w-3.5 h-3.5 text-[#1CE479] animate-spin" />
+              )}
+            </div>
+
+            {/* Results */}
+            {linkResults.length > 0 && (
+              <div className="space-y-1 max-h-52 overflow-y-auto pr-0.5">
+                {linkResults.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => insertInternalLink(p)}
+                    title={`Chèn link: /blog/${p.slug}`}
+                    className={`w-full text-left px-2.5 py-2 rounded-lg border transition-colors
+                      ${linkInserted === p.slug
+                        ? "bg-[#1CE479]/10 border-[#1CE479]/40 text-[#1CE479]"
+                        : "bg-[#0D0D12] border-[#2A2A35] text-[#E5E7EB] hover:border-[#1CE479]/50 hover:bg-[#0D0D12]"
+                      }`}
+                  >
+                    <span className="block text-xs font-medium line-clamp-2 leading-snug">
+                      {linkInserted === p.slug ? "✓ Đã chèn — " : ""}{p.title}
+                    </span>
+                    <span className="block text-[10px] font-mono text-[#4A4A55] truncate mt-0.5">
+                      /blog/{p.slug}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!linkSearching && linkSearch.trim() && linkResults.length === 0 && (
+              <p className="text-xs text-[#4A4A55]">Không tìm thấy bài nào.</p>
+            )}
+
+            {/* Hint */}
+            <p className="text-[10px] text-[#4A4A55] leading-relaxed">
+              💡 Bôi đen text trước → click bài → text đó thành link. Hoặc click thẳng để chèn link đầy đủ vào vị trí con trỏ.
+            </p>
           </div>
 
           {/* Thumbnail */}
